@@ -174,8 +174,11 @@ db.serialize(() => {
   });
 });
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'uploads');
+// Ensure uploads directory exists (Vercel-compatible)
+const uploadsDir = process.env.VERCEL 
+  ? path.join('/tmp', 'uploads') 
+  : path.join(__dirname, 'uploads');
+
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log('📂 Created uploads directory for large files');
@@ -453,10 +456,10 @@ function requireVerifiedEmail(req, res, next) {
   });
 }
 
-// Enhanced Multer configuration for 100GB files
+// Enhanced Multer configuration for 100GB files (Vercel-compatible)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadsDir); // Use the same uploadsDir variable from above
   },
   filename: (req, file, cb) => {
     const uniqueId = crypto.randomUUID();
