@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager Pro - Secure File Upload & Management</title>
+    <meta name="description" content="Production-ready file upload and management system with email verification, user authentication, and 100GB file support">
+    <meta name="author" content="Bareq Maher">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📁</text></svg>">
+</head>
+<body>
+    <!-- Copyright Notice -->
+    <div class="copyright-header">
+        <span>© 2024 File Manager Pro - Created by <a href="https://github.com/bareqmaher-arch" target="_blank" rel="noopener">Bareq Maher</a></span>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-modal-content">
+            <div class="auth-header">
+                <h2 id="authTitle">Welcome to File Manager Pro</h2>
+                <p id="authSubtitle">Please login to continue</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="auth-btn">Login</button>
+                <p class="auth-switch">
+                    Don't have an account? 
+                    <a href="#" id="showRegister">Create one</a>
+                </p>
+                <p class="auth-switch">
+                    <a href="#" id="showForgotPassword">Forgot password?</a>
+                </p>
+                <p class="auth-switch">
+                    <a href="#" id="showResendVerification">Resend verification email</a>
+                </p>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form hidden" id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required autocomplete="email">
+                    <small>A verification email will be sent to this address</small>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required minlength="6" autocomplete="new-password">
+                    <small>Minimum 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-btn">Create Account</button>
+                <p class="auth-switch">
+                    Already have an account? 
+                    <a href="#" id="showLogin">Sign in</a>
+                </p>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form class="auth-form hidden" id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">Email</label>
+                    <input type="email" id="forgotEmail" required autocomplete="email">
+                    <small>Enter your email to receive a password reset link</small>
+                </div>
+                <button type="submit" class="auth-btn">Send Reset Link</button>
+                <p class="auth-switch">
+                    Remember your password? 
+                    <a href="#" id="showLoginFromForgot">Sign in</a>
+                </p>
+            </form>
+
+            <!-- Resend Verification Form -->
+            <form class="auth-form hidden" id="resendVerificationForm">
+                <div class="form-group">
+                    <label for="resendEmail">Email</label>
+                    <input type="email" id="resendEmail" required autocomplete="email">
+                    <small>Enter your email to resend verification link</small>
+                </div>
+                <button type="submit" class="auth-btn">Resend Verification</button>
+                <p class="auth-switch">
+                    Already verified? 
+                    <a href="#" id="showLoginFromResend">Sign in</a>
+                </p>
+            </form>
+
+            <!-- Email Verification Pending -->
+            <div class="verification-pending hidden" id="verificationPending">
+                <div class="verification-icon">📧</div>
+                <h3>Check Your Email</h3>
+                <p>We've sent a verification link to your email address. Please click the link to verify your account and start uploading files.</p>
+                <div class="verification-actions">
+                    <button class="auth-btn secondary" id="resendVerificationBtn">Resend Email</button>
+                    <button class="auth-btn" id="backToLoginBtn">Back to Login</button>
+                </div>
+            </div>
+
+            <div class="auth-message" id="authMessage"></div>
+        </div>
+    </div>
+
+    <!-- Email Verification Success Modal -->
+    <div class="verification-success-modal hidden" id="verificationSuccessModal">
+        <div class="verification-success-content">
+            <div class="verification-icon">✅</div>
+            <h2>Email Verified Successfully!</h2>
+            <p>Your email has been verified. You can now login and start uploading files up to 100GB each!</p>
+            <button class="auth-btn" id="proceedToLoginBtn">Proceed to Login</button>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="container" id="mainApp">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>📁 File Manager Pro</h1>
+                    <p>Production-ready file upload and management system with email verification</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Loading...</span>
+                        <span class="verification-badge" id="verificationBadge"></span>
+                        <button class="logout-btn" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalFiles">0</div>
+                    <div class="stat-label">My Files</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSize">0 MB</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDownloads">0</div>
+                    <div class="stat-label">Downloads</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Email Verification Warning -->
+            <div class="email-verification-warning hidden" id="emailVerificationWarning">
+                <div class="verification-warning-content">
+                    <span class="verification-warning-icon">⚠️</span>
+                    <div class="verification-warning-text">
+                        <strong>Email Verification Required</strong>
+                        <p>Please verify your email address before uploading files. Check your inbox for the verification link.</p>
+                    </div>
+                    <button class="resend-verification-btn" id="resendVerificationMainBtn">Resend Email</button>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Drag & drop files here or click to browse</div>
+                    <div class="upload-text" style="font-size: 0.9em; color: #999;">
+                        Max size: 100GB per file • Max files: 10 at once • Email verification required
+                    </div>
+                    <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+                        Choose Files
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                </div>
+                
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                
+                <div class="message" id="message"></div>
+            </div>
+            
+            <div class="files-section">
+                <h2>
+                    📋 My Files
+                    <button class="refresh-btn" onclick="loadFiles()">🔄 Refresh</button>
+                </h2>
+                <div class="file-list" id="fileList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading files...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+        <div class="share-modal-content">
+            <div class="share-header">
+                <h3>Share File</h3>
+                <button class="close-btn" id="closeShareModal">&times;</button>
+            </div>
+            <div class="share-body">
+                <p>Share this link to allow others to download this file:</p>
+                <div class="share-link-container">
+                    <input type="text" id="shareLink" readonly>
+                    <button class="copy-btn" id="copyShareLink">Copy</button>
+                </div>
+                <div class="share-options">
+                    <label>
+                        <input type="checkbox" id="shareExpires" checked>
+                        Link expires in 7 days
+                    </label>
+                </div>
+                <p class="share-note">
+                    <strong>Note:</strong> Anyone with this link can download the file. No email verification required for downloads.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+
+    <script>
+        // Check for verification success from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('verified') === 'true') {
+                showVerificationSuccess();
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        function showVerificationSuccess() {
+            const modal = document.getElementById('verificationSuccessModal');
+            modal.classList.remove('hidden');
+            
+            document.getElementById('proceedToLoginBtn').addEventListener('click', function() {
+                modal.classList.add('hidden');
+                // The auth status check will handle showing the appropriate form
+                setTimeout(checkAuthStatus, 100);
+            });
+        }
+
+        // Add toast notification system
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, duration);
+        }
+    </script>
+</body>
+</html>
