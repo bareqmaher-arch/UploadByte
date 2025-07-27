@@ -1,6 +1,7 @@
 # 🚀 File Manager Pro v2.0
 
 A modern, production-ready file upload and management system with **user authentication** and **secure file sharing**. Built with Node.js, Express, and SQLite. Features a beautiful responsive UI with drag-and-drop functionality, real-time progress tracking, and comprehensive file management capabilities.
+For Live demo visit : https://uploadbyte-production.up.railway.app/
 
 ## ✨ New Features in v2.0
 
