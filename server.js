@@ -87,7 +87,7 @@ if (authEnabled) {
 // Enhanced JSON and URL parsing for large files
 app.use(express.json({ limit: '100gb' }));
 app.use(express.urlencoded({ limit: '100gb', extended: true }));
-app.use(express.static('public'));
+app.use(express.static('Public'));
 
 // Rate limiting - More lenient for large file uploads
 const uploadLimit = rateLimit({
